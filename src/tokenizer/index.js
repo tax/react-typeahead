@@ -78,7 +78,7 @@ var TypeaheadTokenizer = React.createClass({
       onFocus: function(event) {},
       onBlur: function(event) {},
       onTokenAdd: function() {},
-      onTokenRemove: function() {}
+      onTokenRemove: function() {},
       propagateKeyDownEvents: false,
     };
   },

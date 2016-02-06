@@ -1,4 +1,4 @@
-!function(e){if("object"==typeof exports&&"undefined"!=typeof module)module.exports=e();else if("function"==typeof define&&define.amd)define([],e);else{var f;"undefined"!=typeof window?f=window:"undefined"!=typeof global?f=global:"undefined"!=typeof self&&(f=self),f.ReactTypeahead=e()}}(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
+(function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.ReactTypeahead = f()}})(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
 /*!
   Copyright (c) 2015 Jed Watson.
   Licensed under the MIT License (MIT), see
@@ -99,7 +99,7 @@ fuzzy.match = function(pattern, string, opts) {
   pattern = opts.caseSensitive && pattern || pattern.toLowerCase();
 
   // For each character in the string, either add it to the result
-  // or wrap in template if its the next string in the pattern
+  // or wrap in template if it's the next string in the pattern
   for(var idx = 0; idx < len; idx++) {
     ch = string[idx];
     if(compareString[idx] === pattern[patternIdx]) {
@@ -141,8 +141,8 @@ fuzzy.match = function(pattern, string, opts) {
 //        // string to put after matching character
 //      , post:    '</b>'
 //
-//        // Optional function. Input is an element from the passed in
-//        // `arr`, output should be the string to test `pattern` against.
+//        // Optional function. Input is an entry in the given arr`,
+//        // output should be the string to test `pattern` against.
 //        // In this example, if `arr = [{crying: 'koala'}]` we would return
 //        // 'koala'.
 //      , extract: function(arg) { return arg.crying; }
@@ -150,31 +150,31 @@ fuzzy.match = function(pattern, string, opts) {
 fuzzy.filter = function(pattern, arr, opts) {
   opts = opts || {};
   return arr
-          .reduce(function(prev, element, idx, arr) {
-            var str = element;
-            if(opts.extract) {
-              str = opts.extract(element);
-            }
-            var rendered = fuzzy.match(pattern, str, opts);
-            if(rendered != null) {
-              prev[prev.length] = {
-                  string: rendered.rendered
-                , score: rendered.score
-                , index: idx
-                , original: element
-              };
-            }
-            return prev;
-          }, [])
+    .reduce(function(prev, element, idx, arr) {
+      var str = element;
+      if(opts.extract) {
+        str = opts.extract(element);
+      }
+      var rendered = fuzzy.match(pattern, str, opts);
+      if(rendered != null) {
+        prev[prev.length] = {
+            string: rendered.rendered
+          , score: rendered.score
+          , index: idx
+          , original: element
+        };
+      }
+      return prev;
+    }, [])
 
-          // Sort by score. Browsers are inconsistent wrt stable/unstable
-          // sorting, so force stable by using the index in the case of tie.
-          // See http://ofb.net/~sethml/is-sort-stable.html
-          .sort(function(a,b) {
-            var compare = b.score - a.score;
-            if(compare) return compare;
-            return a.index - b.index;
-          });
+    // Sort by score. Browsers are inconsistent wrt stable/unstable
+    // sorting, so force stable by using the index in the case of tie.
+    // See http://ofb.net/~sethml/is-sort-stable.html
+    .sort(function(a,b) {
+      var compare = b.score - a.score;
+      if(compare) return compare;
+      return a.index - b.index;
+    });
 };
 
 
@@ -196,7 +196,6 @@ KeyEvent.DOM_VK_TAB = KeyEvent.DOM_VK_TAB || 9;
 
 module.exports = KeyEvent;
 
-
 },{}],4:[function(require,module,exports){
 var Typeahead = require('./typeahead');
 var Tokenizer = require('./tokenizer');
@@ -205,7 +204,6 @@ module.exports = {
   Typeahead: Typeahead,
   Tokenizer: Tokenizer
 };
-
 
 },{"./tokenizer":5,"./typeahead":7}],5:[function(require,module,exports){
 /**
@@ -259,7 +257,8 @@ var TypeaheadTokenizer = React.createClass({displayName: "TypeaheadTokenizer",
       React.PropTypes.func
     ]),
     maxVisible: React.PropTypes.number,
-    defaultClassNames: React.PropTypes.bool
+    defaultClassNames: React.PropTypes.bool,
+    propagateKeyDownEvents: React.PropTypes.bool
   },
 
   getInitialState: function() {
@@ -287,7 +286,8 @@ var TypeaheadTokenizer = React.createClass({displayName: "TypeaheadTokenizer",
       onFocus: function(event) {},
       onBlur: function(event) {},
       onTokenAdd: function() {},
-      onTokenRemove: function() {}
+      onTokenRemove: function() {},
+      propagateKeyDownEvents: false,
     };
   },
 
@@ -336,6 +336,10 @@ var TypeaheadTokenizer = React.createClass({displayName: "TypeaheadTokenizer",
     if (event.keyCode === KeyEvent.DOM_VK_BACK_SPACE) {
       return this._handleBackspace(event);
     }
+    // or tabs
+    if (event.keyCode === KeyEvent.DOM_VK_TAB) {
+      this._handleTab(event);
+    }
     this.props.onKeyDown(event);
   },
 
@@ -345,15 +349,27 @@ var TypeaheadTokenizer = React.createClass({displayName: "TypeaheadTokenizer",
       return;
     }
 
-    // Remove token ONLY when bksp pressed at beginning of line
-    // without a selection
-    var entry = this.refs.typeahead.refs.entry;
-    if (entry.selectionStart == entry.selectionEnd &&
-        entry.selectionStart == 0) {
+    if (this._inputIsEmpty()) {
       this._removeTokenForValue(
         this.state.selected[this.state.selected.length - 1]);
       event.preventDefault();
     }
+  },
+
+  _handleTab: function(event) {
+    // Intercept tab to prevent focusing on next element, unless
+    // nothing is selected and the input is empty
+    var entry = this.refs.typeahead.refs.entry;
+    if (!this._inputIsEmpty()) {
+      event.preventDefault();
+    }
+  },
+
+  _inputIsEmpty: function() {
+    // beginning of line, without a selection
+    var entry = this.refs.typeahead.refs.entry;
+    return entry.selectionStart == entry.selectionEnd &&
+        entry.selectionStart == 0;
   },
 
   _removeTokenForValue: function(value) {
@@ -405,14 +421,14 @@ var TypeaheadTokenizer = React.createClass({displayName: "TypeaheadTokenizer",
           onBlur: this.props.onBlur, 
           displayOption: this.props.displayOption, 
           defaultClassNames: this.props.defaultClassNames, 
-          filterOption: this.props.filterOption})
+          filterOption: this.props.filterOption, 
+          propagateKeyDownEvents: this.props.propagateKeyDownEvents})
       )
     );
   }
 });
 
 module.exports = TypeaheadTokenizer;
-
 
 },{"../keyevent":3,"../typeahead":7,"./token":6,"classnames":1,"react":"react"}],6:[function(require,module,exports){
 /**
@@ -483,7 +499,6 @@ var Token = React.createClass({displayName: "Token",
 
 module.exports = Token;
 
-
 },{"classnames":1,"react":"react"}],7:[function(require,module,exports){
 /**
  * @jsx React.DOM
@@ -538,6 +553,7 @@ var Typeahead = React.createClass({displayName: "Typeahead",
       React.PropTypes.func
     ]),
     defaultClassNames: React.PropTypes.bool,
+    propagateKeyDownEvents: React.PropTypes.bool,
     customListComponent: React.PropTypes.oneOfType([
       React.PropTypes.element,
       React.PropTypes.func
@@ -562,6 +578,7 @@ var Typeahead = React.createClass({displayName: "Typeahead",
       onBlur: function(event) {},
       filterOption: null,
       defaultClassNames: true,
+      propagateKeyDownEvents: false,
       customListComponent: TypeaheadSelector
     };
   },
@@ -766,8 +783,10 @@ var Typeahead = React.createClass({displayName: "Typeahead",
     } else {
       return this.props.onKeyDown(event);
     }
-    // Don't propagate the keystroke back to the DOM/browser
-    event.preventDefault();
+    // By default, don't propagate the keystroke back to the DOM/browser
+    if (!this.props.propagateKeyDownEvents) {
+      event.preventDefault();
+    }
   },
 
   componentWillReceiveProps: function(nextProps) {
@@ -861,7 +880,6 @@ var Typeahead = React.createClass({displayName: "Typeahead",
 
 module.exports = Typeahead;
 
-
 },{"../keyevent":3,"./selector":9,"classnames":1,"fuzzy":2,"react":"react"}],8:[function(require,module,exports){
 /**
  * @jsx React.DOM
@@ -928,7 +946,6 @@ var TypeaheadOption = React.createClass({displayName: "TypeaheadOption",
 
 
 module.exports = TypeaheadOption;
-
 
 },{"classnames":1,"react":"react"}],9:[function(require,module,exports){
 /**
@@ -1016,7 +1033,6 @@ var TypeaheadSelector = React.createClass({displayName: "TypeaheadSelector",
 });
 
 module.exports = TypeaheadSelector;
-
 
 },{"./option":8,"classnames":1,"react":"react"}]},{},[4])(4)
 });
